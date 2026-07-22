@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family tree</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 20px;
+        }
+        .tree {
+            background: white;
+            padding: 40px 30px 20px 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin: 10px 0;
+            position: relative;
+        }
+        .group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .couple {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        /* === SEPARACIÓN ESPECIAL PARA ABUELOS === */
+        .grandparents-row {
+            display: flex;
+            justify-content: space-between;  /* ← clave para separarlos */
+            align-items: flex-start;
+            gap: 80px;  /* ← separación amplia entre paternos y maternos */
+            flex-wrap: wrap;
+            padding: 0 20px;
+        }
+        .grandparents-row .group {
+            flex: 0 1 auto;
+        }
+        /* Separador visual entre ambas familias de abuelos */
+        .grandparent-divider {
+            width: 2px;
+            height: 120px;
+            background: #d5d8dc;
+            border-left: 2px dashed #bdc3c7;
+            align-self: center;
+        }
+
+        /* === TAMAÑOS DIFERENCIADOS === */
+        .person {
+            background: #ffffff;
+            border: 2px solid #3498db;
+            border-radius: 16px;
+            padding: 12px 12px 8px 12px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+        .person:hover {
+            transform: scale(1.02);
+        }
+        /* Abuelos: más grandes */
+        .person.grandparent {
+            width: 180px;
+            border-color: #2c3e50;
+        }
+        .person.grandparent .photo {
+            aspect-ratio: 1 / 1;
+        }
+        /* Estilos específicos para cada rama */
+        .grandparent.paternal {
+            border-color: #2c3e50;
+            background: #f8f9fa;
+        }
+        .grandparent.maternal {
+            border-color: #27ae60;
+            background: #f0faf5;
+        }
+        /* Padres: tamaño normal */
+        .person.parent {
+            width: 140px;
+            border-color: #2980b9;
+        }
+        /* Hermanos y yo */
+        .person.sibling {
+            width: 130px;
+            border-color: #8e44ad;
+        }
+        .person.highlight {
+            border-color: #e67e22;
+            border-width: 3px;
+            background: #fef9f0;
+        }
+        .person .photo {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #ecf0f1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #7f8c8d;
+            overflow: hidden;
+        }
+        .person .photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .person .name {
+            font-weight: 600;
+            margin-top: 8px;
+            font-size: 15px;
+            color: #2c3e50;
+        }
+        .person .label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        /* Líneas de conexión */
+        .line-vertical {
+            width: 2px;
+            height: 25px;
+            background: #b0b0b0;
+            margin: 0 auto;
+        }
+        .line-horizontal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            position: relative;
+        }
+        .line-horizontal::before,
+        .line-horizontal::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: #b0b0b0;
+            min-width: 30px;
+        }
+        .line-horizontal .center-dot {
+            width: 10px;
+            height: 10px;
+            background: #b0b0b0;
+            border-radius: 50%;
+        }
+        .siblings {
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        /* Etiquetas de familia */
+        .family-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #7f8c8d;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            background: #ecf0f1;
+            padding: 4px 16px;
+            border-radius: 20px;
+        }
+        .family-label.paternal-label {
+            color: #2c3e50;
+            background: #eaecee;
+        }
+        .family-label.maternal-label {
+            color: #27ae60;
+            background: #e8f8ee;
+        }
+        .footer-note {
+            margin-top: 30px;
+            color: #bdc3c7;
+            font-size: 13px;
+        }
+        @media (max-width: 800px) {
+            .grandparents-row {
+                gap: 40px;
+            }
+            .grandparent-divider {
+                height: 80px;
+            }
+            .person.grandparent {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="tree">
+    <h1>🌳 Family tree</h1>
+
+    <!-- ===== FILA 1: ABUELOS (separados) ===== -->
+    <div class="row grandparents-row">
+        <!-- Abuelos paternos (izquierda) -->
+        <div class="group">
+            <div class="family-label paternal-label">👔 PATERNAL LINE</div>
+            <div class="couple">
+                <div class="person grandparent paternal">
+                    <div class="photo"><img src="img/Arquimedes.png" alt="Abuelo paterno"></div>
+                    <div class="name">Paternal Grandfather</div>
+                    <div class="label">Arquimedes Salas.</div>
+                </div>
+                <div class="person grandparent paternal">
+                    <div class="photo"><img src="img/Libbis1.png" alt="Abuela paterna"></div>
+                    <div class="name">Paternal Grandmother</div>
+                    <div class="label">Libbis Estrella.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Separador visual -->
+        <div class="grandparent-divider"></div>
+
+        <!-- Abuelos maternos (derecha) -->
+        <div class="group">
+            <div class="family-label maternal-label">🌸 MATERNAL LINE</div>
+            <div class="couple">
+                <div class="person grandparent maternal">
+                    <div class="photo"><img src="img/Luciano.png" alt="Abuelo materno"></div>
+                    <div class="name">Maternal Grandfather</div>
+                    <div class="label">Luciano Quispe.</div>
+                </div>
+                <div class="person grandparent maternal">
+                    <div class="photo"><img src="img/Aida.png" alt="Abuela materna"></div>
+                    <div class="name">Maternal Grandmother</div>
+                    <div class="label">Aida Mendoza.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Líneas hacia padres (convergen) -->
+    <div class="line-vertical"></div>
+    <div class="line-horizontal">
+        <span class="center-dot"></span>
+    </div>
+    <div class="line-vertical"></div>
+
+    <!-- ===== FILA 2: PADRES ===== -->
+    <div class="row">
+        <div class="couple">
+            <div class="person parent">
+                <div class="photo"><img src="img/TONY.png" alt="Papá"></div>
+                <div class="name">Father</div>
+                <div class="label">Tony Salas Estrella</div>
+            </div>
+            <div class="person parent">
+                <div class="photo"><img src="img/Yessenia.png" alt="Mamá"></div>
+                <div class="name">Mother</div>
+                <div class="label">Yessenia Quispe Mendoza</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Línea hacia los hijos -->
+    <div class="line-vertical"></div>
+    <div class="line-horizontal">
+        <span class="center-dot"></span>
+    </div>
+    <div class="line-vertical"></div>
+
+    <!-- ===== FILA 3: HERMANAS + YO ===== -->
+    <div class="row">
+        <div class="siblings">
+            <div class="person sibling">
+                <div class="photo"><img src="img/Luciana.png" alt="Hermana 1"></div>
+                <div class="name">older sister</div>
+                <div class="label">Luciana Salas Quispe</div>
+            </div>
+            <div class="person sibling">
+                <div class="photo"><img src="img/Itzel.png" alt="Hermana 2"></div>
+                <div class="name">second sister</div>
+                <div class="label">Itzel Salas Quispe</div>
+            </div>
+            <div class="person sibling highlight">
+                <div class="photo"><img src="img/Kajol1.png" alt="Yo"></div>
+                <div class="name">me too..</div>
+                <div class="label">✨ Kajol Salas Quispe</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        ✅ We are a happy and close-knit family.
+    </div>
+</div>
+</body>
+</html>
